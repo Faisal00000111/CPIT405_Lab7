@@ -5,8 +5,8 @@ const btnFetchAsyncAwait = document.getElementById("fetchAsyncAwait");
 let searchQueryElem = document.getElementById("query");
 let searchResults = document.getElementById("searchResults");
 
-const API_URL = "https://api.giphy.com/v1/gifs/search";
-const API_KEY = "OOFQyDZzbZFXWQQmclci3LmNZlAALKxH";
+const API_URL = "https://api.unsplash.com/search/photos";
+const API_KEY = "R11IL0IR5ZQWNnnYw-m2H67k1QfyyctF_LAsx_g5xro";
 
 btnXHR.addEventListener("click", function () {
   searchResults.innerHTML = "";
@@ -23,6 +23,13 @@ btnFetchAsyncAwait.addEventListener("click", function () {
   searchUsingFetchAsync(searchQueryElem.value);
 });
 
+function getParams(query) {
+  if (!query || query.trim().length === 0) {
+    return;
+  }
+  return "client_id=" + API_KEY + "&query=" + query + "&per_page=5";
+}
+
 function searchUsingXHR(query) {
   if (!query || query.trim().length === 0) {
     return;
@@ -34,16 +41,14 @@ function searchUsingXHR(query) {
     }
   });
 
-  let params = "api_key=" + API_KEY + "&q=" + query + "&limit=5&rating=g";
+  let params = getParams(query);
   xhr.open("GET", API_URL + "?" + params);
+  xhr.setRequestHeader("Authorization", "Client-ID " + API_KEY); // Set header
   xhr.send();
 }
 
 function searchUsingFetch(query) {
-  if (!query || query.trim().length === 0) {
-    return;
-  }
-  let params = "api_key=" + API_KEY + "&q=" + query + "&limit=5&rating=g";
+  let params = getParams(query);
   fetch(API_URL + "?" + params, { method: "GET" })
     .then((response) => {
       return response.text();
@@ -57,10 +62,7 @@ function searchUsingFetch(query) {
 }
 
 async function searchUsingFetchAsync(query) {
-  if (!query || query.trim().length === 0) {
-    return;
-  }
-  let params = "api_key=" + API_KEY + "&q=" + query + "&limit=5&rating=g";
+  let params = getParams(query);
   fetch(API_URL + "?" + params, { method: "GET" });
   let response = await fetch(API_URL + "?" + params, { method: "GET" });
   let data = await response.json();
@@ -68,10 +70,10 @@ async function searchUsingFetchAsync(query) {
 }
 
 function displayResults(respObject) {
-  for (item of respObject.data) {
+  for (item of respObject.results) {
     let imgElement = document.createElement("img");
-    imgElement.src = item.images.downsized_medium.url;
-    imgElement.alt = item.title;
+    imgElement.src = item.urls.small;
+    imgElement.alt = item.alt_description;
     searchResults.appendChild(imgElement);
   }
 }
