@@ -69,11 +69,41 @@ async function searchUsingFetchAsync(query) {
   displayResults(data);
 }
 
-function displayResults(respObject) {
-  for (item of respObject.results) {
-    let imgElement = document.createElement("img");
-    imgElement.src = item.urls.small;
-    imgElement.alt = item.alt_description;
-    searchResults.appendChild(imgElement);
+function createImageCard(result) {
+  const {
+    urls: { small },
+    description,
+    user: { name, location },
+    views,
+    tags,
+  } = result;
+
+  const tagTitles = tags.map(tag => tag.title).join(', ') || 'N/A';
+  const imageDescription = description || 'N/A';
+  const userLocation = location || 'N/A';
+
+  return `
+    <div class="image-card">
+      <img src="${small}" alt="${imageDescription}" />
+      <div class="image-info">
+        <p><strong>Description:</strong> ${imageDescription}</p>
+        <p><strong>Creator:</strong> ${name}</p>
+        <p><strong>Location:</strong> ${userLocation}</p>
+        <p><strong>Views:</strong> ${views}</p>
+        <p><strong>Tags:</strong> ${tagTitles}</p>
+      </div>
+    </div>
+  `;
+}
+
+function displayResults(data) {
+  const searchResults = document.getElementById('searchResults');
+
+  if (!data || !data.results || data.results.length === 0) {
+    searchResults.innerHTML = 'No results found';
+    return;
   }
+
+  const images = data.results.map(createImageCard).join('');
+  searchResults.innerHTML = images;
 }
